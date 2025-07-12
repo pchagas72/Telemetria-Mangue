@@ -1,0 +1,31 @@
+# Bytecode Python
+__pycache__/
+*.py[cod]
+*.pkl
+
+# Arquivos temporários e gerados
+*.png
+*.pdf
+*.log
+*.DS_Store
+*.swp
+
+# Dados da sessão (deve ser regenerado a cada run)
+backend/data/telemetria.csv
+
+# Fontes locais (se forem usadas apenas para PDF local)
+backend/DejaVuSans.ttf
+backend/DejaVuSans.*.pkl
+
+# Arquivos shell pessoais
+extra/bluetooth_adapter.sh
+*.sh
+
+# IDEs e editores
+.vscode/
+.idea/
+
+# Ambiente virtual (se criado localmente)
+venv/
+.env/
+

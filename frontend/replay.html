@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Replay de Telemetria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <div class="replay-container">
+        <div class="left_panel">
+            <div class="sessao_player">
+                <h2>Replay de Sessão</h2>
+                <input type="file" id="csvInput" accept=".csv">
+                <div class="replay-controls">
+                    <button onclick="iniciarReplay()">Reproduzir</button>
+                    <button onclick="pausarReplay()">Pausar</button>
+                    <button onclick="resetarReplay()">Resetar</button>
+                </div>
+                <button onclick="enviarCSVparaPDF()">Gerar PDF da Sessão</button>
+                <p><strong>Timestamp atual:</strong> <span id="timestamp_display">--</span></p>
+                <input type="range" id="replay_progress" min="0" max="100" value="0" step="1" />
+
+            </div>
+
+            <div class="graficos_replay">
+                <canvas id="velocidade"></canvas>
+                <canvas id="rpm"></canvas>
+                <canvas id="temperatura"></canvas>
+                <canvas id="bateria"></canvas>
+            </div>
+        </div>
+
+        <div class="right_panel">
+            <div id="map" style="height: 300px; width: 100%; margin-bottom: 20px;"></div>
+            <div class="bateria_status">
+                <h2>Status da Bateria</h2>
+                <div class="soc_bar_container">
+                    <div id="soc_bar" class="soc_bar"></div>
+                </div>
+                <p>SOC: <span id="bateria_soc">--</span> %</p>
+                <p>Tensão: <span id="bateria_tensao">--</span> V</p>
+                <p>Corrente: <span id="bateria_corrente">--</span> mA</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dados = [], currentIndex = 0, intervalo;
+        let velocidadeChart, rpmChart, temperaturaChart, bateriaChart;
+        let map, marker, caminho = [], polyline;
+
+        const setupChart = (ctx, label, cores) => new Chart(ctx, {
+            type: 'line',
+            data: { labels: [], datasets: cores },
+            options: {
+                responsive: true,
+                animation: false,
+                scales: {
+                    x: { display: false },
+                    y: { ticks: { color: '#cdd6f4' } }
+                },
+                plugins: {
+                    title: { display: true, text: label, color: '#cdd6f4', font: { size: 18 } },
+                    legend: { labels: { color: '#cdd6f4' } }
+                }
+            }
+        });
+
+        window.onload = () => {
+            velocidadeChart = setupChart(document.getElementById('velocidade').getContext('2d'), 'Velocidade', [
+                { label: 'Velocidade', data: [], borderColor: '#00ADB5', fill: false }
+            ]);
+            rpmChart = setupChart(document.getElementById('rpm').getContext('2d'), 'RPM', [
+                { label: 'RPM', data: [], borderColor: '#ADB500', fill: false }
+            ]);
+            temperaturaChart = setupChart(document.getElementById('temperatura').getContext('2d'), 'Temperatura', [
+                { label: 'Motor', data: [], borderColor: '#FF5733', fill: false },
+                { label: 'Câmbio', data: [], borderColor: '#3375FF', fill: false }
+            ]);
+            bateriaChart = setupChart(document.getElementById('bateria').getContext('2d'), 'Bateria', [
+                { label: 'SOC (%)', data: [], borderColor: '#00ff99', fill: false },
+                { label: 'Tensão (V)', data: [], borderColor: '#00bfff', fill: false },
+                { label: 'Corrente (mA)', data: [], borderColor: '#ff0066', fill: false }
+            ]);
+
+            map = L.map('map').setView([0, 0], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            marker = L.marker([0, 0]).addTo(map);
+            polyline = L.polyline(caminho, { color: 'red' }).addTo(map);
+        };
+
+        document.getElementById('csvInput').addEventListener('change', function() {
+            const file = this.files[0];
+            Papa.parse(file, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    dados = results.data;
+                    resetarReplay();
+                }
+            });
+        });
+
+        function iniciarReplay() {
+            if (!dados.length) return;
+
+            function tocarProximo() {
+                if (currentIndex >= dados.length - 1) return;
+
+                const atual = dados[currentIndex];
+                const proximo = dados[currentIndex + 1];
+
+                const delay = new Date(proximo.timestamp) - new Date(atual.timestamp);
+
+                atualizarGraficos(atual);
+                atualizarBateriaUI(atual);
+                atualizarMapa(atual.latitude, atual.longitude);
+                document.getElementById("timestamp_display").innerText = atual.timestamp;
+
+                currentIndex++;
+                intervalo = setTimeout(tocarProximo, delay);
+                atualizarProgresso();
+            }
+
+            tocarProximo();
+        }
+
+        function pausarReplay() {
+            clearTimeout(intervalo);
+        }
+
+        function resetarReplay() {
+            clearInterval(intervalo);
+            currentIndex = 0;
+            caminho = [];
+            polyline.setLatLngs([]);
+            [velocidadeChart, rpmChart, temperaturaChart, bateriaChart].forEach(chart => {
+                chart.data.labels = [];
+                chart.data.datasets.forEach(ds => ds.data = []);
+                chart.update();
+            });
+        }
+
+        function atualizarGraficos(data) {
+            velocidadeChart.data.labels.push("");
+            velocidadeChart.data.datasets[0].data.push(parseFloat(data.vel));
+            velocidadeChart.update();
+
+            rpmChart.data.labels.push("");
+            rpmChart.data.datasets[0].data.push(parseFloat(data.rpm));
+            rpmChart.update();
+
+            temperaturaChart.data.labels.push("");
+            temperaturaChart.data.datasets[0].data.push(parseFloat(data.temp_motor));
+            temperaturaChart.data.datasets[1].data.push(parseFloat(data.temp_cvt));
+            temperaturaChart.update();
+
+            bateriaChart.data.labels.push("");
+            bateriaChart.data.datasets[0].data.push(parseFloat(data.soc));
+            bateriaChart.data.datasets[1].data.push(parseFloat(data.volt));
+            bateriaChart.data.datasets[2].data.push(parseFloat(data.current));
+            bateriaChart.update();
+
+            document.getElementById("timestamp_display").innerText = data.timestamp;
+        }
+
+        function atualizarBateriaUI(data) {
+            const soc = parseFloat(data.soc);
+            const volt = parseFloat(data.volt);
+            const current = parseFloat(data.current);
+
+            document.getElementById("bateria_soc").innerText = soc.toFixed(0);
+            document.getElementById("bateria_tensao").innerText = volt.toFixed(2);
+            document.getElementById("bateria_corrente").innerText = current.toFixed(0);
+
+            const socBar = document.getElementById("soc_bar");
+            socBar.style.width = `${soc}%`;
+            if (soc < 20) {
+                socBar.style.backgroundColor = "#ff4444";
+            } else if (soc < 50) {
+                socBar.style.backgroundColor = "#ffaa00";
+            } else {
+                socBar.style.backgroundColor = "#00ff99";
+            }
+        }
+
+        function atualizarMapa(lat, lon) {
+            const latNum = parseFloat(lat);
+            const lonNum = parseFloat(lon);
+            if (!isNaN(latNum) && !isNaN(lonNum)) {
+                const novaPosicao = [latNum, lonNum];
+                marker.setLatLng(novaPosicao);
+                map.setView(novaPosicao, map.getZoom());
+                caminho.push(novaPosicao);
+                polyline.setLatLngs(caminho);
+            }
+        }
+
+        function atualizarProgresso() {
+            const progresso = Math.round((currentIndex / (dados.length - 1)) * 100);
+            document.getElementById("replay_progress").value = progresso;
+        }
+
+        document.getElementById("replay_progress").addEventListener("input", function() {
+            const percent = this.value;
+            currentIndex = Math.round((percent / 100) * (dados.length - 1));
+            resetarGraficos();
+            for (let i = 0; i < currentIndex; i++) {
+                atualizarGraficos(dados[i]);
+                atualizarBateriaUI(dados[i]);
+                atualizarMapa(dados[i].latitude, dados[i].longitude);
+            }
+            document.getElementById("timestamp_display").innerText = dados[currentIndex].timestamp;
+        });
+
+        function resetarGraficos() {
+            [velocidadeChart, rpmChart, temperaturaChart, bateriaChart].forEach(chart => {
+                chart.data.labels = [];
+                chart.data.datasets.forEach(ds => ds.data = []);
+                chart.update();
+            });
+            caminho = [];
+            polyline.setLatLngs([]);
+        }
+
+        async function enviarCSVparaPDF() {
+            const input = document.getElementById("csvInput");
+            if (!input.files.length) return alert("Selecione um CSV primeiro!");
+
+            const formData = new FormData();
+            formData.append("csv", input.files[0]);
+
+            const res = await fetch("http://localhost:8000/gerar_pdf", {
+                method: "POST",
+                body: formData
+            });
+
+            const blob = await res.blob();
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "relatorio_sessao.pdf";
+            link.click();
+        }
+    </script>
+</body>
+</html>
