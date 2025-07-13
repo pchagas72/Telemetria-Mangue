@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 
-
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dashboard Telemetria</title>
         <!-- Caminhos atualizados -->
         <link rel="stylesheet" href="/app/style.css">
-        <script src="/app/script.js"></script>
         <link rel="manifest" href="/app/manifest.json">
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -21,6 +19,10 @@
         crossorigin=""></script>
         <link rel="icon" href="/icon-192.png" type="image/png">
         <meta name="theme-color" content="#00ADB5">
+
+        <script src="/app/common.js"></script>
+        <script src="/app/script.js"></script>
+
     </head>
     <body>
         <div class="status_mobile" id="status_mobile">SOC: --% | Motor: --°C | Vel: --km/h</div>
@@ -36,6 +38,14 @@
                 <div class="grafico_div"><canvas id="chart_rpm"></canvas></div>
                 <div class="grafico_div"><canvas id="chart_aceleracao"></canvas></div>
                 <div class="grafico_div"><canvas id="chart_temperatura"></canvas></div>
+            </div>
+            <div id="carro_diagrama">
+                <button class="ecu" id="ecu_traseira">ECU-rear</button>
+                <button class="ecu" id="ecu_mpu">MPU</button>
+                <button class="ecu" id="ecu_scu">SCU</button>
+                <button class="ecu" id="ecu_bms">BMS</button>
+                <button class="ecu" id="ecu_frontal">ECU-front</button>
+                <button class="ecu" id="ecu_volante">Volante</button>
             </div>
         </div>
         <div class="right_panel">
@@ -68,5 +78,4 @@
             </div>
         </div>
     </body>
-
 </html>

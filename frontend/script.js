@@ -14,7 +14,6 @@ window.onload = () => {
     const ctxRpm = document.getElementById('chart_rpm').getContext('2d');
     const ctxAcel = document.getElementById('chart_aceleracao').getContext('2d');
     const ctxTemp = document.getElementById('chart_temperatura').getContext('2d');
-    //const ctxBateria = document.getElementById('bateria').getContext('2d');
 
     velocidadeChart = new Chart(ctxVel, { type: 'line', data: setupData("Velocidade"), options: setupOptions("Velocidade") });
     rpmChart = new Chart(ctxRpm, { type: 'line', data: setupData("RPM"), options: setupOptions("RPM") });
@@ -41,18 +40,6 @@ window.onload = () => {
         },
         options: setupOptions("Temperatura")
     });
-    //bateriaChart = new Chart(ctxBateria, {
-        //type: 'line',
-        //data: {
-            //labels: [],
-            //datasets: [
-                //{ label: "SOC (%)", data: [], borderColor: "#00ff99", fill: false },
-                //{ label: "Tensão (V)", data: [], borderColor: "#00bfff", fill: false },
-                //{ label: "Corrente (mA)", data: [], borderColor: "#ff0066", fill: false }
-            //]
-        //},
-        //options: setupOptions("Status da Bateria")
-    //});
 
     // Início do mapa
 
@@ -64,6 +51,8 @@ window.onload = () => {
     // Adiciona um marcador inicial
     marker = L.marker([0, 0]).addTo(map);
     polyline = L.polyline(caminho, { color: 'red' }).addTo(map);
+
+    // Fim Gráfico
 
     aplicarPreferenciasGraficos();
 
@@ -328,5 +317,3 @@ function aplicarPreferenciasGraficos() {
         }
     });
 }
-
-

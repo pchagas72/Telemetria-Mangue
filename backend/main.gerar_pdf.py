@@ -7,6 +7,9 @@ from starlette.websockets import WebSocketDisconnect
 import asyncio
 import json
 import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from fpdf import FPDF
 from data.mangue_data import MangueData
 from debug.debugger import BluetoothDebugger
 
@@ -80,7 +83,43 @@ async def websocket_debug(websocket: WebSocket):
 
 @app.post("/gerar_pdf")
 async def gerar_pdf(csv: UploadFile = File(...)):
-    nome_pdf = MD.montar_relatorio(csv)
+    df = pd.read_csv(csv.file)
+
+    nome_pdf = "relatorio_sessao.pdf"
+
+    # Gráfico de velocidade
+    plt.figure(figsize=(6, 2))
+    df['vel'].plot(title='Velocidade (km/h)', color='blue')
+    plt.xlabel('Instante')
+    plt.ylabel('Velocidade')
+    plt.tight_layout()
+    plt.savefig("velocidade.png")
+    plt.close()
+
+    # PDF com fpdf2 e fonte UTF-8
+    pdf = FPDF()
+    pdf.add_page()
+
+    # Adiciona fonte UTF-8
+    font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    if not os.path.exists(font_path):
+        font_path = "DejaVuSans.ttf"  # fallback (coloque esse ttf na raiz do projeto)
+    pdf.add_font("DejaVu", "", font_path, uni=True)
+    pdf.set_font("DejaVu", size=12)
+
+    pdf.cell(200, 10, txt="Relatório de Sessão – Mangue Baja UFPE", ln=True)
+    pdf.ln(5)
+
+    pdf.cell(200, 10, txt=f"Duração: {len(df)*0.5:.1f} s", ln=True)
+    pdf.cell(200, 10, txt=f"Velocidade média: {df['vel'].mean():.2f} km/h", ln=True)
+    pdf.cell(200, 10, txt=f"RPM máximo: {df['rpm'].max()}", ln=True)
+    pdf.cell(200, 10, txt=f"Temperatura motor máx: {df['temp_motor'].max()} °C", ln=True)
+    pdf.cell(200, 10, txt=f"SOC final: {df['soc'].iloc[-1]} %", ln=True)
+    pdf.ln(5)
+
+    pdf.image("velocidade.png", x=10, w=180)
+
+    pdf.output(nome_pdf)
     return FileResponse(nome_pdf, media_type="application/pdf", filename=nome_pdf)
 
 
