@@ -1,4 +1,4 @@
-# 🏁 Mangue Baja - Sistema de Telemetria
+# Mangue Baja - Sistema de Telemetria
 Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equipe **Mangue Baja UFPE**. O projeto foi desenvolvido com foco em:
 
 - Visualização em tempo real dos dados do carro
@@ -15,7 +15,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 - **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
 - **Modo Debug:** Comunicação via Bluetooth RFCOMM (ou simulado)
 
-## 🗂 Estrutura do repositório
+## Estrutura do repositório
 
 ```
 /backend       → Código Python do servidor, simulação e PDF
@@ -24,7 +24,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 /docs          → Documentação detalhada por funcionalidade
 ```
 
-## 🚀 Status atual
+## Status atual
 
 ✅ Telemetria funcional em tempo real  
 ✅ Replay de sessões com barra de progresso  
