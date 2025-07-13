@@ -1,8 +1,8 @@
-# 🚧 Planejamento Futuro e Ideias
+# Planejamento Futuro e Ideias
 
 O sistema foi projetado para crescer com a equipe. Aqui estão algumas ideias futuras:
 
-## 🎯 Funcionalidades avançadas
+## Funcionalidades avançadas
 
 - Modo pista com tempo por setor
 - Análise de voltas (melhor volta, consistência)
