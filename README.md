@@ -58,6 +58,8 @@ Acesse a interface via `index.html` (tempo real) ou `replay.html` (replay).
 * Filtro de dados
 * !Modo mecânico (mobile)
 * Logs estruturados (JSON/DB)
+* Adicionar marcadores de volta nos gráficos
+* Marcadores do usuário
 
 ### 🚀 Funcionalidades avançadas
 
