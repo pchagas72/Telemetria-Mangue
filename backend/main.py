@@ -1,46 +1,61 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi import UploadFile, File
+from starlette.websockets import WebSocketDisconnect
 import asyncio
 import json
 import os
-from data.mangue_data import MangueData
-from debug.debugger import BluetoothDebugger
-from fastapi import UploadFile, File
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
+from data.mangue_data import MangueData
+from debug.debugger import BluetoothDebugger
 
 
 app = FastAPI()
+
+frontend_path = os.path.join(os.path.dirname(__file__), "../frontend")
+app.mount("/app", StaticFiles(directory=frontend_path, html=True), name="frontend")
+
 MD = MangueData()
 porta_bt = "/dev/rfcomm0"
 usar_simulacao = not os.path.exists(porta_bt)
 debugger = BluetoothDebugger(porta_bt, 9600, simulate=usar_simulacao)
 
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # ou restrinja para ["http://192.168.X.X:8000"]
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-@app.get("/")
-async def root():
-    return {"message": "API de Telemetria Rodando"}
+@app.get("/app")
+async def home():
+    return FileResponse(os.path.join(frontend_path, "index.html"))
+
+
+@app.get("/replay")
+async def replay():
+    return FileResponse(os.path.join(frontend_path, "replay.html"))
 
 
 @app.websocket("/ws/telemetry")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    while True:
-        data = MD.gerar_dados()
-        await websocket.send_text(json.dumps(data))
-        MD.salvar_em_csv(data)
-        await asyncio.sleep(0.5)
+    try:
+        while True:
+            data = MD.gerar_dados()
+            await websocket.send_text(json.dumps(data))
+            MD.salvar_em_csv(data)
+            await asyncio.sleep(0.5)
+    except WebSocketDisconnect:
+        print("[WebSocket] Cliente desconectado")
+    except Exception as e:
+        print("[WebSocket] Erro inesperado:", e)
 
 
 @app.get("/download_csv")
@@ -110,9 +125,4 @@ async def gerar_pdf(csv: UploadFile = File(...)):
 
 @app.delete("/deletar_run")
 async def deletar_csv():
-    caminho = "./data/telemetria.csv"
-    if os.path.exists(caminho):
-        os.remove(caminho)
-        return {"mensagem": "Arquivo deletado com sucesso"}
-    else:
-        return {"mensagem": "Arquivo não encontrado"}
+    MD.deletar_csv()

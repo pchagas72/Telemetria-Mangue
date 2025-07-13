@@ -30,11 +30,23 @@ button:hover {
     height: 100%;
 }
 
+.grafico_toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 0;
+    font-size: 0.9rem;
+}
+
 .graficos{
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     flex-wrap: wrap;
+    
+}
+.grafico_div{
+    width: 100%;
     canvas {
         max-width: 100%;
         max-height: 200px;
@@ -144,3 +156,74 @@ button:hover {
         color: #cdd6f4;
     }
 }
+
+.status_mobile {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .status_mobile {
+        display: block;
+        position: sticky;
+        top: 0;
+        background-color: #1e1e2e;
+        color: #cdd6f4;
+        padding: 5px 10px;
+        text-align: center;
+        font-size: 0.95rem;
+        z-index: 100;
+    }
+}
+
+@media (max-width: 900px) {
+    body {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .left_panel, .right_panel {
+        width: 100%;
+        border: none;
+        padding-top: 5px;
+        border-top: 2px solid #cdd6f4;
+        margin: 0;
+    }
+
+    .graficos, .graficos_replay {
+        flex-direction: column;
+        align-items: center;
+        canvas {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+    }
+
+    .buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .actions {
+        height: auto;
+    }
+
+    .soc_bar_container {
+        height: 20px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    #map {
+        height: 250px !important;
+    }
+
+    .sessao_player {
+        align-items: center;
+    }
+}
+

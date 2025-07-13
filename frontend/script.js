@@ -1,4 +1,6 @@
-const ws = new WebSocket("ws://localhost:8000/ws/telemetry");
+const protocolo = location.protocol === "https:" ? "wss" : "ws";
+const host = location.hostname;
+const ws = new WebSocket(`${protocolo}://${host}:8000/ws/telemetry`);
 
 let velocidadeChart, rpmChart, aceleracaoChart;
 
@@ -8,10 +10,10 @@ let caminho = [];      // Lista de posições anteriores
 let polyline;          // A linha do caminho
 
 window.onload = () => {
-    const ctxVel = document.getElementById('velocidade').getContext('2d');
-    const ctxRpm = document.getElementById('rpm').getContext('2d');
-    const ctxAcel = document.getElementById('aceleracao').getContext('2d');
-    const ctxTemp = document.getElementById('temperatura').getContext('2d');
+    const ctxVel = document.getElementById('chart_velocidade').getContext('2d');
+    const ctxRpm = document.getElementById('chart_rpm').getContext('2d');
+    const ctxAcel = document.getElementById('chart_aceleracao').getContext('2d');
+    const ctxTemp = document.getElementById('chart_temperatura').getContext('2d');
     //const ctxBateria = document.getElementById('bateria').getContext('2d');
 
     velocidadeChart = new Chart(ctxVel, { type: 'line', data: setupData("Velocidade"), options: setupOptions("Velocidade") });
@@ -62,6 +64,8 @@ window.onload = () => {
     // Adiciona um marcador inicial
     marker = L.marker([0, 0]).addTo(map);
     polyline = L.polyline(caminho, { color: 'red' }).addTo(map);
+
+    aplicarPreferenciasGraficos();
 
 };
 
@@ -115,6 +119,10 @@ ws.onmessage = (event) => { // Quando receber dados
 
     updateDiagnostico(data);
     updateMapa(data.latitude, data.longitude);
+
+    document.getElementById("status_mobile").innerText =
+        `SoC: ${data.soc}% | Motor:${data.temp_motor}°C | Vel: ${data.vel} km/h`;
+
 };
 
 function updateChart(chart, value) {
@@ -204,7 +212,7 @@ function updateDiagnostico(data){
 function updateMapa(lat, lon) {
     if (!isNaN(lat) && !isNaN(lon)) {
         const novaPosicao = [lat, lon];
-        
+
         // Atualiza posição do marcador
         marker.setLatLng(novaPosicao);
 
@@ -230,7 +238,7 @@ debugWs.onmessage = (event) => {
 };
 
 function executarDebug() {
-    fetch("http://localhost:8000/debug", {
+    fetch("/debug", {
         method: "POST"
     });
 }
@@ -254,17 +262,71 @@ function updateBateriaUI(soc, volt, current) {
 }
 
 async function deletarRun() {
-  const confirmacao = confirm("Tem certeza que deseja deletar a sessão atual?");
-  if (!confirmacao) return;
+    const confirmacao = confirm("Tem certeza que deseja deletar a sessão atual?");
+    if (!confirmacao) return;
 
-  const res = await fetch("http://localhost:8000/deletar_run", {
-    method: "DELETE"
-  });
+    const res = await fetch("http://localhost:8000/deletar_run", {
+        method: "DELETE"
+    });
 
-  if (res.ok) {
-    alert("Arquivo de sessão deletado.");
-  } else {
-    alert("Erro ao deletar arquivo.");
-  }
+    if (res.ok) {
+        alert("Arquivo de sessão deletado.");
+    } else {
+        alert("Erro ao deletar arquivo.");
+    }
 }
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+        .then(() => console.log("Service Worker registrado"))
+        .catch(err => console.error("Erro no SW:", err));
+}
+
+document.getElementById("btn_debug").onclick = () => {
+    const cmd = document.getElementById("debug_input").value || "MD";
+    console.log("Enviando comando de debug:", cmd);
+
+    fetch("/debug", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ cmd })
+    })
+        .then(resp => {
+            if (!resp.ok) throw new Error("Erro no debug");
+            return resp.json();
+        })
+        .then(data => console.log("Resposta:", data))
+        .catch(err => console.error("Erro ao enviar debug:", err));
+};
+
+function toggleGrafico(id) {
+    const key = `grafico_${id}`;
+    const canvas = document.getElementById("chart_" + id);
+    const visible = canvas.parentElement.style.display !== "none";
+
+    // Alterna visibilidade
+    canvas.parentElement.style.display = visible ? "none" : "block";
+
+    // Salva no localStorage
+    localStorage.setItem(key, visible ? "hidden" : "visible");
+}
+
+function aplicarPreferenciasGraficos() {
+    const ids = ["velocidade", "rpm", "aceleracao", "temperatura"]; // ajuste conforme seus gráficos
+
+    ids.forEach(id => {
+        const estado = localStorage.getItem(`grafico_${id}`);
+        const canvas = document.getElementById("chart_" + id);
+        const checkbox = document.querySelector(`input[type="checkbox"][onchange*="${id}"]`);
+
+        if (estado === "hidden") {
+            canvas.parentElement.style.display = "none";
+            if (checkbox) checkbox.checked = false;
+        } else {
+            canvas.parentElement.style.display = "block";
+            if (checkbox) checkbox.checked = true;
+        }
+    });
+}
+
 

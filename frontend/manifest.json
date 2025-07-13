@@ -1,0 +1,22 @@
+{
+  "name": "Mangue Baja Telemetria",
+  "short_name": "Mangue",
+  "start_url": "/app/index.html",
+  "display": "standalone",
+  "background_color": "#1e1e2e",
+  "theme_color": "#00ADB5",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
+

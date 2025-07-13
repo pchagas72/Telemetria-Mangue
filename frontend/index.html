@@ -6,8 +6,10 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Dashboard Telemetria</title>
-        <link rel="stylesheet" href="style.css">
-        <script src="script.js"></script>
+        <!-- Caminhos atualizados -->
+        <link rel="stylesheet" href="/app/style.css">
+        <script src="/app/script.js"></script>
+        <link rel="manifest" href="/app/manifest.json">
         <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -17,28 +19,23 @@
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
         crossorigin=""></script>
+        <link rel="icon" href="/icon-192.png" type="image/png">
+        <meta name="theme-color" content="#00ADB5">
     </head>
     <body>
+        <div class="status_mobile" id="status_mobile">SOC: --% | Motor: --°C | Vel: --km/h</div>
         <div class="left_panel">
-            <!-- <div class="general_data">
-                <div class="entry">
-                    <h2>Temperaturas: </h2>
-                    <p>Motor: <span id="motor_temp">--</span> °C</p>
-                    <p>CVT: <span id="cambio_temp">--</span> °C</p>
-                </div>
-                <div class="entry">
-                    <h2>Bateria: </h2>
-                    <p>SOC: <span id="bateria_soc">--</span> %</p>
-                    <p>Tensão: <span id="bateria_tensao">--</span> V</p>
-                    <p>Corrente: <span id="bateria_corrente">--</span> mA</p>
-                </div>
-</div> -->
+            <div class="grafico_toggles">
+                <label><input type="checkbox" checked onchange="toggleGrafico('velocidade')"> Velocidade</label>
+                <label><input type="checkbox" checked onchange="toggleGrafico('rpm')">RPM</label>
+                <label><input type="checkbox" checked onchange="toggleGrafico('aceleracao')">Aceleração</label>
+                <label><input type="checkbox" checked onchange="toggleGrafico('temperatura')">Temperatura</label>
+            </div>
             <div class="graficos">
-                <canvas id="velocidade"></canvas>
-                <canvas id="rpm"></canvas>
-                <canvas id="aceleracao"></canvas>
-                <canvas id="temperatura"></canvas>
-                <!--<canvas id="bateria"></canvas>-->
+                <div class="grafico_div"><canvas id="chart_velocidade"></canvas></div>
+                <div class="grafico_div"><canvas id="chart_rpm"></canvas></div>
+                <div class="grafico_div"><canvas id="chart_aceleracao"></canvas></div>
+                <div class="grafico_div"><canvas id="chart_temperatura"></canvas></div>
             </div>
         </div>
         <div class="right_panel">
