@@ -7,7 +7,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 - Acesso por computador ou dispositivo móvel
 - Modularidade e preparação para expansão (LoRa, modo pista)
 
-## 🔧 Tecnologias principais
+## Tecnologias principais
 
 - **Backend:** FastAPI + WebSocket + FPDF2 + Matplotlib
 - **Frontend:** HTML, CSS, JavaScript, Chart.js, Leaflet.js
