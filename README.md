@@ -1,5 +1,4 @@
 # 🏁 Mangue Baja - Sistema de Telemetria
-
 Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equipe **Mangue Baja UFPE**. O projeto foi desenvolvido com foco em:
 
 - Visualização em tempo real dos dados do carro
@@ -7,8 +6,6 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 - Diagnóstico com exportação de relatórios
 - Acesso por computador ou dispositivo móvel
 - Modularidade e preparação para expansão (LoRa, modo pista)
-
----
 
 ## 🔧 Tecnologias principais
 
@@ -18,16 +15,14 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 - **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
 - **Modo Debug:** Comunicação via Bluetooth RFCOMM (ou simulado)
 
----
-
 ## 🗂 Estrutura do repositório
 
-/backend → Código Python do servidor, simulação e PDF
-/frontend → HTML, JS, CSS e arquivos estáticos da interface
-/scripts → Scripts auxiliares (bluetooth, build, etc)
-/docs → Documentação detalhada por funcionalidade
-
----
+```
+/backend       → Código Python do servidor, simulação e PDF
+/frontend      → HTML, JS, CSS e arquivos estáticos da interface
+/scripts       → Scripts auxiliares (bluetooth, build, etc)
+/docs          → Documentação detalhada por funcionalidade
+```
 
 ## 🚀 Status atual
 
@@ -36,24 +31,4 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ✅ Exportação de PDF com gráficos e estatísticas  
 ✅ Modo simulado com dados coerentes  
 ✅ Layout adaptado para mobile  
-✅ Diagnóstico modular via WebSocket  
-
----
-
-## 📌 Para quem é essa interface?
-
-- 🔧 Elétricos: para diagnosticar falhas em ECUs
-- 📊 Mecânicos: para analisar comportamento em testes
-- 🧠 Estratégia: para acompanhar o desempenho na pista
-- 💻 Equipe de software: para expandir com novas features
-
----
-
-## 🔜 Próximos passos (veja `docs/futuro.md`)
-
-- Modo pista (mapa com setores)
-- Análise de voltas e comparação
-- Integração com LoRa e rádio
-- Visualização 3D e exportações avançadas
-
-
+✅ Diagnóstico modular via WebSocket
