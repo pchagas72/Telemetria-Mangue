@@ -1,6 +1,6 @@
-# 💻 Uso Local da Interface de Telemetria
+# Uso Local da Interface de Telemetria
 
-## 📦 Instalação
+## Instalação
 
 ```bash
 git clone ...
@@ -10,19 +10,19 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## 🚀 Rodar o servidor
+## Rodar o servidor
 
 ```bash
 cd backend
 uvicorn main:app --reload
 ```
 
-## 🌐 Interface
+## Interface
 
 - `http://localhost:8000/app` → Modo tempo real
 - `http://localhost:8000/replay` → Modo replay
 
-## 🧪 Modo simulado
+## Modo simulado
 
 Por padrão, o sistema inicia simulando uma sessão. Você verá:
 
