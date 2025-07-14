@@ -122,7 +122,8 @@ class MangueData():
         # Adiciona fonte UTF-8
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
         if not os.path.exists(font_path):
-            font_path = "./DejaVuSans.ttf"  # fallback
+            font_path = os.path.join(
+                os.path.dirname(__file__), "../misc/DejaVuSans.ttf")  # fallback
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
