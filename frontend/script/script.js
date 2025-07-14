@@ -9,6 +9,8 @@ let marker;            // Marcador do carro no mapa
 let caminho = [];      // Lista de posições anteriores
 let polyline;          // A linha do caminho
 
+let filaPacotes = []; // Pacotes do mapa
+
 window.onload = () => {
     const ctxVel = document.getElementById('chart_velocidade').getContext('2d');
     const ctxRpm = document.getElementById('chart_rpm').getContext('2d');
@@ -112,6 +114,9 @@ ws.onmessage = (event) => { // Quando receber dados
     document.getElementById("status_mobile").innerText =
         `SoC: ${data.soc}% | Motor:${data.temp_motor}°C | Vel: ${data.vel} km/h`;
 
+    const dado = JSON.parse(event.data); // Utiliza fila de dados, se necessário
+    filaPacotes.push(dado); 
+
 };
 
 function updateChart(chart, value) {
@@ -126,6 +131,16 @@ function updateChart(chart, value) {
     if (chart.data.labels.length > 50) {
         chart.data.labels.shift();
         chart.data.datasets[0].data.shift();
+    }
+
+    if (chart.data.labels.length > 1000) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+    }
+
+    if (chart.data.labels.length > 300) {
+        chart.data.labels.shift();
+        chart.data.datasets.forEach(dataset => dataset.data.shift());
     }
 
     chart.update();
@@ -317,3 +332,11 @@ function aplicarPreferenciasGraficos() {
         }
     });
 }
+
+setInterval(() => {
+    if (filaPacotes.length > 0) {
+        const ultimo = filaPacotes.at(-1);  
+        atualizarGraficos(ultimo);
+        filaPacotes = [];  
+    }
+}, 500); 

@@ -48,7 +48,7 @@ async def websocket_endpoint(websocket: WebSocket):
             data = MD.gerar_dados()
             await websocket.send_text(json.dumps(data))
             MD.salvar_em_csv(data)
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
     except WebSocketDisconnect:
         print("[WebSocket] Cliente desconectado")
     except Exception as e:
