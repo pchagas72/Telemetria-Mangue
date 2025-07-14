@@ -266,7 +266,7 @@ async function deletarRun() {
 }
 
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
+    navigator.serviceWorker.register('/app/script/service-worker.js')
         .then(() => console.log("Service Worker registrado"))
         .catch(err => console.error("Erro no SW:", err));
 }

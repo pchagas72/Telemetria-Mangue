@@ -136,5 +136,5 @@ async function enviarCSVparaPDF() {
     link.download = "relatorio_sessao.pdf";
     link.click();
 }
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app/service-worker.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/app/script/service-worker.js');
 
