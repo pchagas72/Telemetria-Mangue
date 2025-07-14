@@ -79,44 +79,41 @@ class MangueData():
         df = pd.read_csv(csv.file)
         print(df.head())
 
-        nome_pdf = "relatorio_sessao.pdf"
+        nome_pdf = "./output/relatorio_sessao.pdf"
 
-        # Gráfico de velocidade
         plt.figure(figsize=(6, 2))
         df['vel'].plot(title='Velocidade (km/h)', color='blue')
         plt.xlabel('Instante')
         plt.ylabel('Velocidade')
         plt.tight_layout()
-        plt.savefig("velocidade.png")
+        plt.savefig("./output/imagens/velocidade.png")
         plt.close()
 
-        # RPM vs tempo
         plt.figure(figsize=(6, 2))
         df['rpm'].plot(title='RPM', color='orange')
         plt.xlabel('Instante')
         plt.ylabel('RPM')
         plt.tight_layout()
-        plt.savefig("rpm.png")
+        plt.savefig("./output/imagens/rpm.png")
         plt.close()
 
-        # Aceleração x vs tempo
         plt.figure(figsize=(6, 2))
         df['accx'].plot(title='Aceleração X', color='green')
         plt.xlabel('Instante')
         plt.ylabel('m/s²')
         plt.tight_layout()
-        plt.savefig("accx.png")
+        plt.savefig("./output/imagens/accx.png")
         plt.close()
 
-        # Gráfico CVT (scatter de rpm vs vel)
+        # Gráfico CVT
         plt.figure(figsize=(6, 2))
         plt.scatter(df['vel'], df['rpm'], s=10, color='red')
         plt.title("CVT – RPM x Velocidade")
         plt.xlabel("Velocidade (km/h)")
         plt.ylabel("RPM")
         plt.tight_layout()
-        plt.savefig("cvt.png")
-        plt.close() 
+        plt.savefig("./output/imagens/cvt.png")
+        plt.close()
 
         # PDF com fpdf2 e fonte UTF-8
         pdf = FPDF()
@@ -125,7 +122,7 @@ class MangueData():
         # Adiciona fonte UTF-8
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
         if not os.path.exists(font_path):
-            font_path = "DejaVuSans.ttf"  # fallback (coloque esse ttf na raiz do projeto)
+            font_path = "./DejaVuSans.ttf"  # fallback
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
@@ -138,12 +135,12 @@ class MangueData():
         pdf.cell(200, 10, txt=f"Temperatura motor máx: {df['temp_motor'].max()} °C", ln=True)
         pdf.cell(200, 10, txt=f"SOC final: {df['soc'].iloc[-1]} %", ln=True)
         pdf.ln(5)
-        pdf.image("rpm.png", x=10, w=180)
+        pdf.image("./output/imagens/rpm.png", x=10, w=180)
         pdf.ln(5)
-        pdf.image("accx.png", x=10, w=180)
+        pdf.image("./output/imagens/accx.png", x=10, w=180)
         pdf.ln(5)
-        pdf.image("cvt.png", x=10, w=180)
+        pdf.image("./output/imagens/cvt.png", x=10, w=180)
         pdf.ln(5)
-        pdf.image("velocidade.png", x=10, w=180)
+        pdf.image("./output/imagens/velocidade.png", x=10, w=180)
         pdf.output(nome_pdf)
         return nome_pdf
