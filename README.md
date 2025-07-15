@@ -35,7 +35,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 
 ## Para fazer:
 
-- Organizar repositório [ ]
+- Organizar repositório [X]
 - Criar arquívo único de biblioteca JS [ ]
-- Fazer estudo dos limites atuais [ ]
-- Trocar chart.js por uplot.js [ ]
+- Fazer estudo dos limites atuais [X]
+    - Trocar chart.js por uplot.js [ ]
