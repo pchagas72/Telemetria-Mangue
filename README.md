@@ -32,3 +32,9 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ✅ Modo simulado com dados coerentes  
 ✅ Layout adaptado para mobile  
 ✅ Diagnóstico modular via WebSocket
+
+## Para fazer:
+
+- Organizar repositório [ ]
+- Criar arquívo único de biblioteca JS [ ]
+- Fazer estudo dos limites atuais [ ]
