@@ -1,237 +1,135 @@
+// script.js otimizado com uPlot.js e atualização de gráficos a cada 250ms com alta performance
+
 const protocolo = location.protocol === "https:" ? "wss" : "ws";
 const host = location.hostname;
 const ws = new WebSocket(`${protocolo}://${host}:8000/ws/telemetry`);
+const renderWindowSize = 30; // Gráficos
 
-let velocidadeChart, rpmChart, aceleracaoChart;
 
-let map;
-let marker;            // Marcador do carro no mapa
-let caminho = [];      // Lista de posições anteriores
-let polyline;          // A linha do caminho
+let velocidadeChart, rpmChart, aceleracaoChart, temperaturaChart;
+let map, marker, caminho = [], polyline;
+let filaPacotes = [];
 
-let filaPacotes = []; // Pacotes do mapa
+const bufferSize = 50;
+const dataVel = [[], []];
+const dataRpm = [[], []];
+const dataAcc = [[], [], [], []];
+const dataTemp = [[], [], []];
 
 window.onload = () => {
-    const ctxVel = document.getElementById('chart_velocidade').getContext('2d');
-    const ctxRpm = document.getElementById('chart_rpm').getContext('2d');
-    const ctxAcel = document.getElementById('chart_aceleracao').getContext('2d');
-    const ctxTemp = document.getElementById('chart_temperatura').getContext('2d');
+    velocidadeChart = criarGraficoUPlot("chart_velocidade", "Velocidade (km/h)", "#00ADB5");
+    rpmChart = criarGraficoUPlot("chart_rpm", "RPM", "#ADB500");
+    aceleracaoChart = criarGraficoUPlotMulti("chart_aceleracao", "Aceleração", ["X", "Y", "Z"], ["#00ADB5", "#ADB500", "#B500AD"]);
+    temperaturaChart = criarGraficoUPlotMulti("chart_temperatura", "Temperatura", ["Motor", "Câmbio"], ["#00ADB5", "#ADB500"]);
 
-    velocidadeChart = new Chart(ctxVel, { type: 'line', data: setupData("Velocidade"), options: setupOptions("Velocidade") });
-    rpmChart = new Chart(ctxRpm, { type: 'line', data: setupData("RPM"), options: setupOptions("RPM") });
-    aceleracaoChart = new Chart(ctxAcel, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                { label: "Aceleração X", data: [], borderColor: "#00ADB5", fill: false },
-                { label: "Aceleração Y", data: [], borderColor: "#ADB500", fill: false },
-                { label: "Aceleração Z", data: [], borderColor: "#B500AD", fill: false }
-            ]
-        },
-        options: setupOptions("Aceleração")
-    });
-    temperaturaChart = new Chart(ctxTemp, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [
-                { label: "Motor", data: [], borderColor: "#00ADB5", fill: false },
-                { label: "Câmbio", data: [], borderColor: "#ADB500", fill: false },
-            ]
-        },
-        options: setupOptions("Temperatura")
-    });
-
-    // Início do mapa
-
-    map = L.map('map').setView([0, 0], 13); // Começa em [lat, long] genéricos
+    map = L.map('map').setView([0, 0], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    // Adiciona um marcador inicial
     marker = L.marker([0, 0]).addTo(map);
     polyline = L.polyline(caminho, { color: 'red' }).addTo(map);
 
-    // Fim Gráfico
-
     aplicarPreferenciasGraficos();
-
+    requestAnimationFrame(loop);
 };
 
-function setupData(label) {
-    return {
-        labels: [],
-        datasets: [{ label, data: [] }]
-    };
+function criarGraficoUPlot(id, label, color) {
+    return new uPlot({
+        title: label,
+        width: 600,
+        height: 200,
+        series: [ {}, { label, stroke: color } ],
+        axes: [ {}, { stroke: "#cdd6f4" } ],
+        scales: { x: { time: false }, y: { auto: true } },
+    }, [[], []], document.getElementById(id));
 }
 
-function setupOptions(titulo) {
-    return {
-        responsive: true,
-        animation: false,
-        scales: {
-            x: { display: false },
-            y: { ticks: { color: '#cdd6f4' } }
-        },
-        plugins: {
-            legend: {
-                position: 'top',
-                labels: {
-                    color: '#cdd6f4',
-                    font: {
-                        size: 16,
-                        family: 'Arial'
-                    }
-                }
-            },
-            title: {
-                display: true,
-                text: titulo,
-                color: '#cdd6f4',
-                font: {
-                    size: 20
-                },
-                align: 'center'
-            }
-        }
-    };
+function criarGraficoUPlotMulti(id, titulo, labels, cores) {
+    const series = [{}, ...labels.map((l, i) => ({ label: l, stroke: cores[i] }))];
+    return new uPlot({
+        title: titulo,
+        width: 600,
+        height: 200,
+        series,
+        axes: [ {}, { stroke: "#cdd6f4" } ],
+        scales: { x: { time: false }, y: { auto: true } },
+    }, Array(series.length).fill([]).map(() => []), document.getElementById(id));
 }
 
-ws.onmessage = (event) => { // Quando receber dados
+ws.onmessage = (event) => {
     const data = JSON.parse(event.data);
+    filaPacotes.push(data);
+};
 
-    updateChart(velocidadeChart, data.vel);
-    updateChart(rpmChart, data.rpm);
-    updateAceleracaoChart(aceleracaoChart, data.accx, data.accy, data.accz);
-    updateTemperaturaChart(temperaturaChart, data.temp_motor, data.temp_cvt);
+function atualizarGraficos(data) {
+    const now = Date.now();
+    updateBuffer(dataVel, now, data.vel);
+    updateBuffer(dataRpm, now, data.rpm);
+    updateMultiBuffer(dataAcc, now, [data.accx, data.accy, data.accz]);
+    updateMultiBuffer(dataTemp, now, [data.temp_motor, data.temp_cvt]);
+    const start = Math.max(0, dataVel[0].length - renderWindowSize);
+    velocidadeChart.setData([
+        dataVel[0].slice(start),
+        dataVel[1].slice(start)
+    ]);
+
+    rpmChart.setData([
+        dataRpm[0].slice(start),
+        dataRpm[1].slice(start)
+    ]);
+
+    aceleracaoChart.setData([
+        dataAcc[0].slice(start),
+        dataAcc[1].slice(start),
+        dataAcc[2].slice(start),
+        dataAcc[3].slice(start)
+    ]);
+
+    temperaturaChart.setData([
+        dataTemp[0].slice(start),
+        dataTemp[1].slice(start),
+        dataTemp[2].slice(start),
+    ]);
+
+    //velocidadeChart.setData(dataVel);
+    //rpmChart.setData(dataRpm);
+    //aceleracaoChart.setData(dataAcc);
+    //temperaturaChart.setData(dataTemp);
+
     updateBateriaUI(data.soc, data.volt, data.current);
-
     updateDiagnostico(data);
     updateMapa(data.latitude, data.longitude);
 
-    document.getElementById("status_mobile").innerText =
-        `SoC: ${data.soc}% | Motor:${data.temp_motor}°C | Vel: ${data.vel} km/h`;
-
-    const dado = JSON.parse(event.data); // Utiliza fila de dados, se necessário
-    filaPacotes.push(dado); 
-
-};
-
-function updateChart(chart, value) {
-    if (Array.isArray(value)) {
-        chart.data.labels.push("");
-        chart.data.datasets[0].data.push(value[0]);
-    } else {
-        chart.data.labels.push("");
-        chart.data.datasets[0].data.push(value);
-    }
-
-    if (chart.data.labels.length > 50) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-    }
-
-    if (chart.data.labels.length > 1000) {
-        chart.data.labels.shift();
-        chart.data.datasets[0].data.shift();
-    }
-
-    if (chart.data.labels.length > 300) {
-        chart.data.labels.shift();
-        chart.data.datasets.forEach(dataset => dataset.data.shift());
-    }
-
-    chart.update();
+    document.getElementById("status_mobile").innerText = `SoC: ${data.soc}% | Motor:${data.temp_motor}°C | Vel: ${data.vel} km/h`;
 }
 
-function updateAceleracaoChart(chart, accX, accY, accZ) {
-    chart.data.labels.push("");
-
-    chart.data.datasets[0].data.push(accX);
-    chart.data.datasets[1].data.push(accY);
-    chart.data.datasets[2].data.push(accZ);
-
-    if (chart.data.labels.length > 50) {
-        chart.data.labels.shift();
-        chart.data.datasets.forEach(ds => ds.data.shift());
+function updateBuffer(buffer, x, y) {
+    buffer[0].push(x);
+    buffer[1].push(y);
+    if (buffer[0].length > bufferSize) {
+        buffer[0].shift();
+        buffer[1].shift();
     }
-
-    chart.update();
 }
 
-function updateTemperaturaChart(chart, temp_motor, temp_cvt) {
-    chart.data.labels.push("");
-
-    chart.data.datasets[0].data.push(temp_motor);
-    chart.data.datasets[1].data.push(temp_cvt);
-
-    if (chart.data.labels.length > 50) {
-        chart.data.labels.shift();
-        chart.data.datasets.forEach(ds => ds.data.shift());
+function updateMultiBuffer(buffer, x, ys) {
+    if (buffer.length !== ys.length + 1) return;
+    buffer[0].push(x);
+    ys.forEach((y, i) => buffer[i + 1].push(y));
+    if (buffer[0].length > bufferSize) {
+        buffer.forEach(arr => arr.shift());
     }
-
-    chart.update();
-}
-
-function updateBateriaChart(chart, soc, volt, current) {
-    chart.data.labels.push("");
-
-    chart.data.datasets[0].data.push(soc);
-    chart.data.datasets[1].data.push(volt);
-    chart.data.datasets[2].data.push(current);
-
-    if (chart.data.labels.length > 50) {
-        chart.data.labels.shift();
-        chart.data.datasets.forEach(ds => ds.data.shift());
-    }
-
-    chart.update();
 }
 
 function updateDiagnostico(data){
     const log = document.getElementById("debug_log");
-
-    if (data.temp_motor > 90) {
-        log.value += "⚠️ Temperatura do motor elevada: " + data.temp_motor + "°C\n";
-    }
-
-    if (data.soc < 20) {
-        log.value += "⚠️ SOC da bateria baixo: " + data.soc + "%\n";
-    }
-
-    if (data.current > 400) {
-        log.value += "⚠️ Corrente muito alta: " + data.current + " mA\n";
-    }
-
-    if (data.volt < 10.5 || data.volt > 12.5) {
-        log.value += "⚠️ Tensão fora do ideal: " + data.volt + " V\n";
-    }
-
-    log.scrollTop = log.scrollHeight; // Scroll automático
+    if (data.temp_motor > 90) log.value += `⚠️ Temperatura elevada: ${data.temp_motor}°C\n`;
+    if (data.soc < 20) log.value += `⚠️ SOC baixo: ${data.soc}%\n`;
+    if (data.current > 400) log.value += `⚠️ Corrente alta: ${data.current} mA\n`;
+    if (data.volt < 10.5 || data.volt > 12.5) log.value += `⚠️ Tensão fora do ideal: ${data.volt} V\n`;
+    log.scrollTop = log.scrollHeight;
 }
-
-
-function updateMapa(lat, lon) {
-    if (!isNaN(lat) && !isNaN(lon)) {
-        const novaPosicao = [lat, lon];
-
-        // Atualiza posição do marcador
-        marker.setLatLng(novaPosicao);
-
-        // Move a visualização do mapa (mantendo zoom atual)
-        map.setView(novaPosicao, map.getZoom());
-
-        // Adiciona nova posição ao caminho
-        caminho.push(novaPosicao);
-
-        // Atualiza a linha (polyline) com a nova lista de posições
-        polyline.setLatLngs(caminho);
-    }
-}
-
-// Debugger
 
 const debugWs = new WebSocket("ws://localhost:8000/ws/debug");
 
@@ -245,24 +143,6 @@ function executarDebug() {
     fetch("/debug", {
         method: "POST"
     });
-}
-
-function updateBateriaUI(soc, volt, current) {
-    document.getElementById("bateria_soc").innerText = soc.toFixed(0);
-    document.getElementById("bateria_tensao").innerText = volt.toFixed(2);
-    document.getElementById("bateria_corrente").innerText = current.toFixed(0);
-
-    const socBar = document.getElementById("soc_bar");
-    socBar.style.width = `${soc}%`;
-
-    // Alterar cor da barra conforme o nível de SOC
-    if (soc < 20) {
-        socBar.style.backgroundColor = "#ff4444"; // vermelho
-    } else if (soc < 50) {
-        socBar.style.backgroundColor = "#ffaa00"; // laranja
-    } else {
-        socBar.style.backgroundColor = "#00ff99"; // verde
-    }
 }
 
 async function deletarRun() {
@@ -280,63 +160,59 @@ async function deletarRun() {
     }
 }
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/app/script/service-worker.js')
-        .then(() => console.log("Service Worker registrado"))
-        .catch(err => console.error("Erro no SW:", err));
+function updateMapa(lat, lon) {
+    if (!isNaN(lat) && !isNaN(lon)) {
+        const novaPosicao = [lat, lon];
+        marker.setLatLng(novaPosicao);
+        map.setView(novaPosicao, map.getZoom());
+        caminho.push(novaPosicao);
+        polyline.setLatLngs(caminho);
+    }
 }
 
-document.getElementById("btn_debug").onclick = () => {
-    const cmd = document.getElementById("debug_input").value || "MD";
-    console.log("Enviando comando de debug:", cmd);
+function updateBateriaUI(soc, volt, current) {
+    document.getElementById("bateria_soc").innerText = soc.toFixed(0);
+    document.getElementById("bateria_tensao").innerText = volt.toFixed(2);
+    document.getElementById("bateria_corrente").innerText = current.toFixed(0);
 
-    fetch("/debug", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ cmd })
-    })
-        .then(resp => {
-            if (!resp.ok) throw new Error("Erro no debug");
-            return resp.json();
-        })
-        .then(data => console.log("Resposta:", data))
-        .catch(err => console.error("Erro ao enviar debug:", err));
-};
-
-function toggleGrafico(id) {
-    const key = `grafico_${id}`;
-    const canvas = document.getElementById("chart_" + id);
-    const visible = canvas.parentElement.style.display !== "none";
-
-    // Alterna visibilidade
-    canvas.parentElement.style.display = visible ? "none" : "block";
-
-    // Salva no localStorage
-    localStorage.setItem(key, visible ? "hidden" : "visible");
+    const socBar = document.getElementById("soc_bar");
+    socBar.style.width = `${soc}%`;
+    socBar.style.backgroundColor = soc < 20 ? "#ff4444" : soc < 50 ? "#ffaa00" : "#00ff99";
 }
 
 function aplicarPreferenciasGraficos() {
-    const ids = ["velocidade", "rpm", "aceleracao", "temperatura"]; // ajuste conforme seus gráficos
-
+    const ids = ["velocidade", "rpm", "aceleracao", "temperatura"];
     ids.forEach(id => {
         const estado = localStorage.getItem(`grafico_${id}`);
-        const canvas = document.getElementById("chart_" + id);
-        const checkbox = document.querySelector(`input[type="checkbox"][onchange*="${id}"]`);
-
+        const div = document.getElementById("chart_" + id);
+        const checkbox = document.querySelector(`input[type='checkbox'][onchange*='${id}']`);
         if (estado === "hidden") {
-            canvas.parentElement.style.display = "none";
+            div.parentElement.style.display = "none";
             if (checkbox) checkbox.checked = false;
         } else {
-            canvas.parentElement.style.display = "block";
+            div.parentElement.style.display = "block";
             if (checkbox) checkbox.checked = true;
         }
     });
 }
 
-setInterval(() => {
-    if (filaPacotes.length > 0) {
-        const ultimo = filaPacotes.at(-1);  
+function toggleGrafico(id) {
+    const key = `grafico_${id}`;
+    const div = document.getElementById("chart_" + id);
+    const visible = div.parentElement.style.display !== "none";
+    div.parentElement.style.display = visible ? "none" : "block";
+    localStorage.setItem(key, visible ? "hidden" : "visible");
+}
+
+// Atualização com requestAnimationFrame a cada 250ms
+let ultimaAtualizacao = 0;
+function loop() {
+    const agora = Date.now();
+    if (filaPacotes.length > 0 && agora - ultimaAtualizacao > 250) {
+        const ultimo = filaPacotes.at(-1);
         atualizarGraficos(ultimo);
-        filaPacotes = [];  
+        filaPacotes = [];
+        ultimaAtualizacao = agora;
     }
-}, 500); 
+    requestAnimationFrame(loop);
+}
