@@ -9,7 +9,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 
 ## Tecnologias principais
 
-- **Backend:** FastAPI + WebSocket + FPDF2 + Matplotlib
+- **Backend:** FastAPI + WebSocket + FPDF2 + Matplotlib + aiomqtt
 - **Frontend:** HTML, CSS, JavaScript, Chart.js, Leaflet.js
 - **Simulação:** Geração de dados realistas via Pandas
 - **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
@@ -32,6 +32,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ✅ Modo simulado com dados coerentes  
 ✅ Layout adaptado para mobile  
 ✅ Diagnóstico modular via WebSocket
+✅ Conexão MQTT para recebimento de dados
 
 ## Para fazer:
 
