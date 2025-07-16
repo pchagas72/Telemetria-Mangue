@@ -43,4 +43,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
     - Trocar front para react [ ]
 - Implementar interface em react [ ]
     - Implementar dashboard [X]
-    - Implementar replay [ ]
+    - Implementar replay [X]
+    - Implementar download de CSV [ ]
+    - Implementar debugger [ ]
+    - Implementar router [ ]
