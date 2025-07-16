@@ -7,14 +7,30 @@ import os
 import random
 
 
-class MangueData():
+class MangueData:
     def __init__(self):
         self.ARQUIVO_CSV_PATH = "./data/telemetria.csv"
         self.timestamp_atual = datetime.now()
         self.CAMPOS_FIXOS = [
-            "accx", "accy", "accz", "dpsx", "dpsy", "dpsz", "roll", "pitch",
-            "rpm", "vel", "temp_motor", "soc", "temp_cvt", "volt", "current",
-            "flags", "latitude", "longitude", "timestamp"
+            "accx",
+            "accy",
+            "accz",
+            "dpsx",
+            "dpsy",
+            "dpsz",
+            "roll",
+            "pitch",
+            "rpm",
+            "vel",
+            "temp_motor",
+            "soc",
+            "temp_cvt",
+            "volt",
+            "current",
+            "flags",
+            "latitude",
+            "longitude",
+            "timestamp",
         ]
         self.inicio = datetime.now()
         self.vel_anterior = 0
@@ -49,7 +65,7 @@ class MangueData():
             "flags": 0,
             "latitude": round(self.base_lat + tempo_s * 0.00002, 6),
             "longitude": round(self.base_lon + math.sin(tempo_s / 20) * 0.0001, 6),
-            "timestamp": self.timestamp_atual.isoformat()
+            "timestamp": self.timestamp_atual.isoformat(),
         }
 
         self.vel_anterior = vel
@@ -63,12 +79,14 @@ class MangueData():
         if not os.path.exists(self.ARQUIVO_CSV_PATH):
             df_novo.to_csv(self.ARQUIVO_CSV_PATH, index=False)
         else:
-            df_novo.to_csv(self.ARQUIVO_CSV_PATH, mode='a', header=False, index=False)
+            df_novo.to_csv(self.ARQUIVO_CSV_PATH, mode="a", header=False, index=False)
 
     def deletar_csv(self):
         if os.path.exists(self.ARQUIVO_CSV_PATH):
             try:
-                pd.DataFrame(columns=self.CAMPOS_FIXOS).to_csv(self.ARQUIVO_CSV_PATH, index=False)
+                pd.DataFrame(columns=self.CAMPOS_FIXOS).to_csv(
+                    self.ARQUIVO_CSV_PATH, index=False
+                )
                 return {"mensagem": "Conteúdo apagado, cabeçalho preservado"}
             except Exception as e:
                 return {"erro": f"Falha ao limpar arquivo: {str(e)}"}
@@ -82,32 +100,32 @@ class MangueData():
         nome_pdf = "./output/relatorio_sessao.pdf"
 
         plt.figure(figsize=(6, 2))
-        df['vel'].plot(title='Velocidade (km/h)', color='blue')
-        plt.xlabel('Instante')
-        plt.ylabel('Velocidade')
+        df["vel"].plot(title="Velocidade (km/h)", color="blue")
+        plt.xlabel("Instante")
+        plt.ylabel("Velocidade")
         plt.tight_layout()
         plt.savefig("./output/imagens/velocidade.png")
         plt.close()
 
         plt.figure(figsize=(6, 2))
-        df['rpm'].plot(title='RPM', color='orange')
-        plt.xlabel('Instante')
-        plt.ylabel('RPM')
+        df["rpm"].plot(title="RPM", color="orange")
+        plt.xlabel("Instante")
+        plt.ylabel("RPM")
         plt.tight_layout()
         plt.savefig("./output/imagens/rpm.png")
         plt.close()
 
         plt.figure(figsize=(6, 2))
-        df['accx'].plot(title='Aceleração X', color='green')
-        plt.xlabel('Instante')
-        plt.ylabel('m/s²')
+        df["accx"].plot(title="Aceleração X", color="green")
+        plt.xlabel("Instante")
+        plt.ylabel("m/s²")
         plt.tight_layout()
         plt.savefig("./output/imagens/accx.png")
         plt.close()
 
         # Gráfico CVT
         plt.figure(figsize=(6, 2))
-        plt.scatter(df['vel'], df['rpm'], s=10, color='red')
+        plt.scatter(df["vel"], df["rpm"], s=10, color="red")
         plt.title("CVT – RPM x Velocidade")
         plt.xlabel("Velocidade (km/h)")
         plt.ylabel("RPM")
@@ -123,7 +141,8 @@ class MangueData():
         font_path = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
         if not os.path.exists(font_path):
             font_path = os.path.join(
-                os.path.dirname(__file__), "../misc/DejaVuSans.ttf")  # fallback
+                os.path.dirname(__file__), "../misc/DejaVuSans.ttf"
+            )  # fallback
         pdf.add_font("DejaVu", "", font_path, uni=True)
         pdf.set_font("DejaVu", size=12)
 
@@ -133,7 +152,9 @@ class MangueData():
         pdf.cell(200, 10, txt=f"Duração: {len(df)*0.5:.1f} s", ln=True)
         pdf.cell(200, 10, txt=f"Velocidade média: {df['vel'].mean():.2f} km/h", ln=True)
         pdf.cell(200, 10, txt=f"RPM máximo: {df['rpm'].max()}", ln=True)
-        pdf.cell(200, 10, txt=f"Temperatura motor máx: {df['temp_motor'].max()} °C", ln=True)
+        pdf.cell(
+            200, 10, txt=f"Temperatura motor máx: {df['temp_motor'].max()} °C", ln=True
+        )
         pdf.cell(200, 10, txt=f"SOC final: {df['soc'].iloc[-1]} %", ln=True)
         pdf.ln(5)
         pdf.image("./output/imagens/rpm.png", x=10, w=180)

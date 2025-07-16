@@ -4,6 +4,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import UploadFile, File
 from starlette.websockets import WebSocketDisconnect
+import aiomqtt
 import asyncio
 import json
 import os
@@ -20,6 +21,8 @@ MD = MangueData()
 porta_bt = "/dev/rfcomm0"
 usar_simulacao = not os.path.exists(porta_bt)
 debugger = BluetoothDebugger(porta_bt, 9600, simulate=usar_simulacao)
+simular_interface = False
+last_data = {}
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,9 +48,17 @@ async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            data = MD.gerar_dados()
-            await websocket.send_text(json.dumps(data))
-            MD.salvar_em_csv(data)
+            if simular_interface:
+                data = MD.gerar_dados()
+                await websocket.send_text(json.dumps(data))
+                MD.salvar_em_csv(data)
+            else:
+                async with aiomqtt.Client("localhost") as client:
+                    await client.subscribe("telemetria/mangue")
+                    async for data in client.messages:
+                        await websocket.send_text(
+                            json.dumps(json.loads(data.payload.decode()))
+                        )
             await asyncio.sleep(0.5)
     except WebSocketDisconnect:
         print("[WebSocket] Cliente desconectado")
@@ -59,7 +70,7 @@ async def websocket_endpoint(websocket: WebSocket):
 async def download_csv():
     arquivo = MD.ARQUIVO_CSV_PATH
     if os.path.exists(arquivo):
-        return FileResponse(arquivo, media_type='text/csv', filename=arquivo)
+        return FileResponse(arquivo, media_type="text/csv", filename=arquivo)
     else:
         return {"error": "Arquivo não encontrado"}
 
