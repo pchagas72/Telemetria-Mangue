@@ -5,11 +5,11 @@ import { Bateria } from "../components/Bateria";
 import { Serial } from "../components/Serial";
 import { useEffect, useState } from "react";
 import { ReplayController } from "../components/ReplayController.tsx"
-import { useReplay } from "../hooks/useReplay";
+import { useReplayContext } from "../context/ReplayContext";
 
 export default function Replay() {
-    const data_total = useReplay();
-    const data = data_total.dadoAtual
+    const { dados, currentIndex } = useReplayContext();
+    const data = dados[currentIndex]; // aqui está o dado atual!
 
     const [timestamps, setTimestamps] = useState<number[]>([]);
     const [velocidades, setVelocidades] = useState<number[]>([]);
@@ -47,6 +47,7 @@ export default function Replay() {
                 setAceleracoesZ((prev) => [...prev.slice(-99), data.accz]);
             }
             console.log(data)
+            console.log(typeof data.accz === "number")
 
             if (!isNaN(data.latitude) && !isNaN(data.longitude)) {
                 const pos: [number, number] = [data.latitude, data.longitude];

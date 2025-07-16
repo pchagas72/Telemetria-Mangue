@@ -1,51 +1,31 @@
-import { ChangeEvent } from "react";
-import { useReplay } from "../hooks/useReplay";
+import { useReplayContext } from "../context/ReplayContext";
 
 export function ReplayController() {
-  const {
-    carregarCSV,
-    iniciar,
-    pausar,
-    reset,
-    irParaProgresso,
-    isPlaying,
-    progress,
-    dadoAtual,
-  } = useReplay();
+    const {
+        play,
+        pause,
+        reset,
+        loadCSV,
+        currentIndex,
+        setCurrentIndex,
+        dados,
+        timestampAtual,
+    } = useReplayContext();
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      carregarCSV(e.target.files[0]);
-    }
-  };
-
-  const handleSliderChange = (e: ChangeEvent<HTMLInputElement>) => {
-    irParaProgresso(Number(e.target.value));
-  };
-
-  return (
-    <div className="replay-controller" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <h2>Replay de Sessão</h2>
-      <input type="file" accept=".csv" onChange={handleFileChange} />
-
-      <div style={{ display: "flex", gap: "0.5rem" }}>
-        <button onClick={iniciar} disabled={isPlaying}>Reproduzir</button>
-        <button onClick={pausar} disabled={!isPlaying}>Pausar</button>
-        <button onClick={reset}>Resetar</button>
-      </div>
-
-      <label>
-        Timestamp atual:
-        <span style={{ marginLeft: "0.5rem" }}>{dadoAtual?.timestamp || "--"}</span>
-      </label>
-
+    return (
+        <div>
+      <input type="file" onChange={(e) => e.target.files && loadCSV(e.target.files[0])} />
+      <button onClick={play}>Play</button>
+      <button onClick={pause}>Pause</button>
+      <button onClick={reset}>Reset</button>
+      <p>Timestamp atual: {timestampAtual}</p>
       <input
         type="range"
-        min={0}
-        max={100}
-        value={progress}
-        onChange={handleSliderChange}
+        value={currentIndex}
+        max={dados.length - 1}
+        onChange={(e) => setCurrentIndex(parseInt(e.target.value))}
       />
     </div>
   );
 }
+
