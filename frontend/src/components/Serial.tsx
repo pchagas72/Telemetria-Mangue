@@ -64,6 +64,7 @@ export function Serial({ data }: SerialProps) {
 
     return (
         <div className="SerialDiv">
+            <h2>Serial Monitor</h2>
             <textarea
                 value={mensagens}
                 readOnly

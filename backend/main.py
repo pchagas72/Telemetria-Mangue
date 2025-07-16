@@ -60,7 +60,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         await websocket.send_text(
                             json.dumps(json.loads(data.payload.decode()))
                         )
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.0001)
     except WebSocketDisconnect:
         print("[WebSocket] Cliente desconectado")
     except Exception as e:
