@@ -37,6 +37,10 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ## Para fazer:
 
 - Organizar repositório [X]
-- Criar arquívo único de biblioteca JS [ ]
 - Fazer estudo dos limites atuais [X]
-    - Trocar chart.js por uplot.js [ ]
+    - Trocar chart.js por uplot.js [X]
+    - Utilizar MQTT no backend [X]
+    - Trocar front para react [ ]
+- Implementar interface em react [ ]
+    - Implementar dashboard [X]
+    - Implementar replay [ ]
