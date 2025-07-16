@@ -1,9 +1,10 @@
 // src/App.tsx
 import Dashboard from "./pages/Dashboard";
+import Replay from "./pages/Replay";
 import "./App.css"
 
 function App() {
-  return <Dashboard />;
+  return <Replay />;
 }
 
 export default App;
