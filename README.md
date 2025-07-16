@@ -31,7 +31,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ✅ Exportação de PDF com gráficos e estatísticas  
 ✅ Modo simulado com dados coerentes  
 ✅ Layout adaptado para mobile  
-✅ Diagnóstico modular via WebSocket
+✅ Diagnóstico modular via WebSocket  
 ✅ Conexão MQTT para recebimento de dados
 
 ## Para fazer:
