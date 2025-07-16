@@ -21,7 +21,7 @@ MD = MangueData()
 porta_bt = "/dev/rfcomm0"
 usar_simulacao = not os.path.exists(porta_bt)
 debugger = BluetoothDebugger(porta_bt, 9600, simulate=usar_simulacao)
-simular_interface = False
+simular_interface = True
 last_data = {}
 
 app.add_middleware(
@@ -56,6 +56,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 async with aiomqtt.Client("localhost") as client:
                     await client.subscribe("telemetria/mangue")
                     async for data in client.messages:
+                        print(data)
                         await websocket.send_text(
                             json.dumps(json.loads(data.payload.decode()))
                         )
