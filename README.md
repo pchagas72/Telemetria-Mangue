@@ -12,6 +12,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 
 ## 🛠 Tecnologias principais
 
+<<<<<<< HEAD
 - **Backend:** FastAPI + WebSocket + aiomqtt + FPDF2 + Matplotlib
 - **Frontend:** React + TypeScript + Vite + uPlot.js + Leaflet.js
 - **Simulação:** Geração de dados realistas via Pandas
@@ -62,10 +63,11 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
   - Roteamento entre páginas com React Router [X]  
 
 - Estilização da interface (botões, layout, responsividade) [ ]  
-- Integração com ECU real (SCU) [ ]  
+- Modificar código da SCU [ ]  
 - Testes finais com dados reais no carro [ ]  
 - Escrita da documentação técnica (instalação, manutenção) [ ]
 
 ---
 
-Feito com ❤️ por Mangue Baja UFPE e apoio de IA colaborativa.
+Feito por Pedro Chagas, membro da equipe Mangue Baja UFPE
+=======
