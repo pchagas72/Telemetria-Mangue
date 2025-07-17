@@ -3,58 +3,69 @@
 Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equipe **Mangue Baja UFPE**. O projeto foi desenvolvido com foco em:
 
 - Visualização em tempo real dos dados do carro
-- Reproduções de sessões passadas (CSV)
-- Diagnóstico com exportação de relatórios
-- Acesso por computador ou dispositivo móvel
-- Modularidade e preparação para expansão (LoRa, modo pista)
-
-## Tecnologias principais
-
-- **Backend:** FastAPI + WebSocket + FPDF2 + Matplotlib + aiomqtt
-- **Frontend:** React + TypeScript + Vite + uPlot.js + Leaflet.js
-- **Simulação:** Geração de dados realistas via Pandas
-- **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
-- **Modo Debug:** Comunicação via Bluetooth RFCOMM (ou simulado)
-
-## Estrutura do repositório
-
-```
-/backend       → Código Python do servidor, simulação e PDF
-/frontend      → HTML, JS, CSS e arquivos estáticos da interface
-/scripts       → Scripts auxiliares (bluetooth, build, etc)
-/docs          → Documentação detalhada por funcionalidade
-```
-
-## Status atual
-
-✅ Telemetria funcional em tempo real  
-✅ Replay de sessões com barra de progresso  
-✅ Exportação de PDF com gráficos e estatísticas  
-✅ Modo simulado com dados coerentes  
-✅ Layout adaptado para mobile  
-✅ Diagnóstico modular via WebSocket  
-✅ Conexão MQTT para recebimento de dados  
-✅ Interface em React com componentes modernos  
-✅ Download e exclusão segura de CSV  
-✅ Comunicação entre cliente-servidor via fetch/WebSocket
+- Reproduções de sessões passadas (via CSV)
+- Diagnóstico com exportação de relatórios em PDF
+- Acesso multiplataforma (desktop e mobile)
+- Modularidade e preparação para expansão (LoRa, Modo Pista)
 
 ---
 
-## TODO
+## 🛠 Tecnologias principais
 
-- Organizar repositório [✅]  
-- Fazer estudo dos limites atuais [✅]  
-  - Trocar chart.js por uplot.js [✅]  
-  - Utilizar MQTT no backend [✅]  
-  - Trocar front para React [✅]  
+- **Backend:** FastAPI + WebSocket + aiomqtt + FPDF2 + Matplotlib
+- **Frontend:** React + TypeScript + Vite + uPlot.js + Leaflet.js
+- **Simulação:** Geração de dados realistas via Pandas
+- **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
+- **Debug:** Comunicação Bluetooth (RFCOMM), com fallback simulado
 
-- Implementar interface em React [✅]  
-  - Implementar dashboard [✅]  
-  - Implementar replay [✅]  
-  - Implementar download de CSV [✅]  
-  - Implementar debugger [✅]  
-  - Implementar router [🔲]  
+---
 
-- Estilizar componentes (botões, layout, responsividade) [🔲]  
-- Testes finais no ambiente real (carro) [🔲]  
-- Documentação de desenvolvimento (README, setup) [🔲]
+## 📁 Estrutura do Repositório
+
+```
+/backend       → Código Python do servidor, simulação e geração de relatórios
+/frontend      → Interface React + TS + Vite (dashboard, replay)
+/scripts       → Scripts auxiliares (setup, bluetooth, build)
+/docs          → Documentação técnica e funcional por módulo
+```
+
+---
+
+## ✅ Status Atual
+
+- ✅ Telemetria funcional em tempo real  
+- ✅ Replay de sessões com barra de progresso e controle  
+- ✅ Exportação de relatórios PDF com gráficos  
+- ✅ Simulador completo com dados coerentes  
+- ✅ Interface moderna com React e Vite  
+- ✅ Responsivo para dispositivos móveis  
+- ✅ Diagnóstico remoto via WebSocket (modo debug)  
+- ✅ Download e exclusão segura de arquivos CSV  
+- ✅ Comunicação cliente-servidor com `fetch`, `WebSocket` e `MQTT`  
+- ✅ Context API e hooks para controle de replay
+
+---
+
+## 🔧 TODO
+
+- Organizar repositório [X]  
+- Fazer estudo dos limites atuais [X]  
+  - Trocar Chart.js por uPlot.js [X]  
+  - Utilizar MQTT no backend [X]  
+  - Migrar frontend para React [X]  
+
+- Implementar interface com React [X]  
+  - Dashboard com gráficos em tempo real [X]  
+  - Página de replay com barra de progresso [X]  
+  - Download de CSV [X]  
+  - Envio de comandos de debug [X]  
+  - Roteamento entre páginas com React Router [X]  
+
+- Estilização da interface (botões, layout, responsividade) [ ]  
+- Integração com ECU real (SCU) [ ]  
+- Testes finais com dados reais no carro [ ]  
+- Escrita da documentação técnica (instalação, manutenção) [ ]
+
+---
+
+Feito com ❤️ por Mangue Baja UFPE e apoio de IA colaborativa.
