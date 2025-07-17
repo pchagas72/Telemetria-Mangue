@@ -3,13 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import UploadFile, File
+from fastapi import Request
 from starlette.websockets import WebSocketDisconnect
 import aiomqtt
 import asyncio
 import json
 import os
+import shutil
 from data.mangue_data import MangueData
 from debug.debugger import BluetoothDebugger
+from pathlib import Path
 
 
 app = FastAPI()
@@ -21,7 +24,7 @@ MD = MangueData()
 porta_bt = "/dev/rfcomm0"
 usar_simulacao = not os.path.exists(porta_bt)
 debugger = BluetoothDebugger(porta_bt, 9600, simulate=usar_simulacao)
-simular_interface = False
+simular_interface = True
 last_data = {}
 
 app.add_middleware(
@@ -56,10 +59,11 @@ async def websocket_endpoint(websocket: WebSocket):
                 async with aiomqtt.Client("localhost") as client:
                     await client.subscribe("telemetria/mangue")
                     async for data in client.messages:
+                        print(data)
                         await websocket.send_text(
                             json.dumps(json.loads(data.payload.decode()))
                         )
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.0001)
     except WebSocketDisconnect:
         print("[WebSocket] Cliente desconectado")
     except Exception as e:
@@ -68,15 +72,24 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/download_csv")
 async def download_csv():
-    arquivo = MD.ARQUIVO_CSV_PATH
-    if os.path.exists(arquivo):
-        return FileResponse(arquivo, media_type="text/csv", filename=arquivo)
-    else:
+    print("Pedido para baixar CSV recebido")
+    arquivo_original = Path(MD.ARQUIVO_CSV_PATH).resolve()
+    if not arquivo_original.exists():
         return {"error": "Arquivo não encontrado"}
+
+    temp_path = Path("./data/temp_telemetria.csv").resolve()
+    shutil.copyfile(arquivo_original, temp_path)
+
+    return FileResponse(
+        path=str(temp_path),
+        media_type="text/csv",
+        filename="dados.csv"
+    )
 
 
 @app.post("/debug")
 async def acionar_debug():
+    print("Pedido para realizar debug recebido")
     debugger.enviar_comando("MB")
     await asyncio.sleep(1.0)  # Tempo para o carro responder
     resposta = debugger.ler_resposta()
@@ -91,6 +104,7 @@ async def websocket_debug(websocket: WebSocket):
 
 @app.post("/gerar_pdf")
 async def gerar_pdf(csv: UploadFile = File(...)):
+    print("Pedido para gerar PDF recebido")
     nome_pdf = MD.montar_relatorio(csv)
     return FileResponse(nome_pdf, media_type="application/pdf", filename=nome_pdf)
 
@@ -98,3 +112,10 @@ async def gerar_pdf(csv: UploadFile = File(...)):
 @app.delete("/deletar_run")
 async def deletar_csv():
     MD.deletar_csv()
+
+
+@app.post("/sinal")
+async def receber_sinal(request: Request):
+    dados = await request.json()
+    print("✅ Sinal recebido do frontend:", dados)
+    return {"status": "ok", "mensagem": "Sinal recebido com sucesso!"}
