@@ -18,10 +18,12 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 
 ## Estrutura do repositório
 
-/backend → Código Python do servidor, simulação e PDF
-/frontend → Interface em React moderna e modular
-/scripts → Scripts auxiliares (bluetooth, build, etc)
-/docs → Documentação detalhada por funcionalidade
+```
+/backend       → Código Python do servidor, simulação e PDF
+/frontend      → HTML, JS, CSS e arquivos estáticos da interface
+/scripts       → Scripts auxiliares (bluetooth, build, etc)
+/docs          → Documentação detalhada por funcionalidade
+```
 
 ## Status atual
 
