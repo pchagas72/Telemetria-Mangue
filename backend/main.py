@@ -3,13 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import UploadFile, File
+from fastapi import Request
 from starlette.websockets import WebSocketDisconnect
 import aiomqtt
 import asyncio
 import json
 import os
+import shutil
 from data.mangue_data import MangueData
 from debug.debugger import BluetoothDebugger
+from pathlib import Path
 
 
 app = FastAPI()
@@ -69,15 +72,24 @@ async def websocket_endpoint(websocket: WebSocket):
 
 @app.get("/download_csv")
 async def download_csv():
-    arquivo = MD.ARQUIVO_CSV_PATH
-    if os.path.exists(arquivo):
-        return FileResponse(arquivo, media_type="text/csv", filename=arquivo)
-    else:
+    print("Pedido para baixar CSV recebido")
+    arquivo_original = Path(MD.ARQUIVO_CSV_PATH).resolve()
+    if not arquivo_original.exists():
         return {"error": "Arquivo não encontrado"}
+
+    temp_path = Path("./data/temp_telemetria.csv").resolve()
+    shutil.copyfile(arquivo_original, temp_path)
+
+    return FileResponse(
+        path=str(temp_path),
+        media_type="text/csv",
+        filename="dados.csv"
+    )
 
 
 @app.post("/debug")
 async def acionar_debug():
+    print("Pedido para realizar debug recebido")
     debugger.enviar_comando("MB")
     await asyncio.sleep(1.0)  # Tempo para o carro responder
     resposta = debugger.ler_resposta()
@@ -92,6 +104,7 @@ async def websocket_debug(websocket: WebSocket):
 
 @app.post("/gerar_pdf")
 async def gerar_pdf(csv: UploadFile = File(...)):
+    print("Pedido para gerar PDF recebido")
     nome_pdf = MD.montar_relatorio(csv)
     return FileResponse(nome_pdf, media_type="application/pdf", filename=nome_pdf)
 
@@ -99,3 +112,10 @@ async def gerar_pdf(csv: UploadFile = File(...)):
 @app.delete("/deletar_run")
 async def deletar_csv():
     MD.deletar_csv()
+
+
+@app.post("/sinal")
+async def receber_sinal(request: Request):
+    dados = await request.json()
+    print("✅ Sinal recebido do frontend:", dados)
+    return {"status": "ok", "mensagem": "Sinal recebido com sucesso!"}

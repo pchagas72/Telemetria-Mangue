@@ -79,7 +79,10 @@ class MangueData:
         if not os.path.exists(self.ARQUIVO_CSV_PATH):
             df_novo.to_csv(self.ARQUIVO_CSV_PATH, index=False)
         else:
-            df_novo.to_csv(self.ARQUIVO_CSV_PATH, mode="a", header=False, index=False)
+            with open(self.ARQUIVO_CSV_PATH, mode="a", newline='') as f:
+                df_novo.to_csv(f, header=False, index=False)
+                f.flush()
+                os.fsync(f.fileno())  # <- força escrita no disco
 
     def deletar_csv(self):
         if os.path.exists(self.ARQUIVO_CSV_PATH):

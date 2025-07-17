@@ -1,4 +1,5 @@
 # Mangue Baja - Sistema de Telemetria
+
 Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equipe **Mangue Baja UFPE**. O projeto foi desenvolvido com foco em:
 
 - Visualização em tempo real dos dados do carro
@@ -10,19 +11,17 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ## Tecnologias principais
 
 - **Backend:** FastAPI + WebSocket + FPDF2 + Matplotlib + aiomqtt
-- **Frontend:** HTML, CSS, JavaScript, Chart.js, Leaflet.js
+- **Frontend:** React + TypeScript + Vite + uPlot.js + Leaflet.js
 - **Simulação:** Geração de dados realistas via Pandas
 - **Compatibilidade:** PWA (modo offline), responsivo e mobile-first
 - **Modo Debug:** Comunicação via Bluetooth RFCOMM (ou simulado)
 
 ## Estrutura do repositório
 
-```
-/backend       → Código Python do servidor, simulação e PDF
-/frontend      → HTML, JS, CSS e arquivos estáticos da interface
-/scripts       → Scripts auxiliares (bluetooth, build, etc)
-/docs          → Documentação detalhada por funcionalidade
-```
+/backend → Código Python do servidor, simulação e PDF
+/frontend → Interface em React moderna e modular
+/scripts → Scripts auxiliares (bluetooth, build, etc)
+/docs → Documentação detalhada por funcionalidade
 
 ## Status atual
 
@@ -32,18 +31,28 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 ✅ Modo simulado com dados coerentes  
 ✅ Layout adaptado para mobile  
 ✅ Diagnóstico modular via WebSocket  
-✅ Conexão MQTT para recebimento de dados
+✅ Conexão MQTT para recebimento de dados  
+✅ Interface em React com componentes modernos  
+✅ Download e exclusão segura de CSV  
+✅ Comunicação entre cliente-servidor via fetch/WebSocket
 
-## Para fazer:
+---
 
-- Organizar repositório [X]
-- Fazer estudo dos limites atuais [X]
-    - Trocar chart.js por uplot.js [X]
-    - Utilizar MQTT no backend [X]
-    - Trocar front para react [ ]
-- Implementar interface em react [ ]
-    - Implementar dashboard [X]
-    - Implementar replay [X]
-    - Implementar download de CSV [ ]
-    - Implementar debugger [ ]
-    - Implementar router [ ]
+## TODO
+
+- Organizar repositório [✅]  
+- Fazer estudo dos limites atuais [✅]  
+  - Trocar chart.js por uplot.js [✅]  
+  - Utilizar MQTT no backend [✅]  
+  - Trocar front para React [✅]  
+
+- Implementar interface em React [✅]  
+  - Implementar dashboard [✅]  
+  - Implementar replay [✅]  
+  - Implementar download de CSV [✅]  
+  - Implementar debugger [✅]  
+  - Implementar router [🔲]  
+
+- Estilizar componentes (botões, layout, responsividade) [🔲]  
+- Testes finais no ambiente real (carro) [🔲]  
+- Documentação de desenvolvimento (README, setup) [🔲]

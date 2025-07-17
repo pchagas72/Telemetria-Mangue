@@ -5,6 +5,7 @@ import { Bateria } from "../components/Bateria";
 import { Serial } from "../components/Serial";
 import { useTelemetry } from "../hooks/useTelemetry";
 import { useEffect, useState } from "react";
+import { DashboardActions } from "../components/DashboardActions";
 
 export default function Dashboard() {
     const data = useTelemetry();
@@ -123,6 +124,7 @@ export default function Dashboard() {
                 {data && <Mapa latitude={data.latitude} longitude={data.longitude} caminho={caminho} />}
                 {data && <Serial data={data} />}
                 {data && <Bateria soc={data.soc} tensao={data.volt} corrente={data.current} />}
+                <DashboardActions />
             </div>
         </div>
     );

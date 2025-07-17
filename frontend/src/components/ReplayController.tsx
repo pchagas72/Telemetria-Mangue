@@ -1,4 +1,5 @@
 import { useReplayContext } from "../context/ReplayContext";
+import { ExportarPDF } from "../components/ReplayActions.tsx"
 
 export function ReplayController() {
     const {
@@ -14,10 +15,11 @@ export function ReplayController() {
 
     return (
         <div>
-      <input type="file" onChange={(e) => e.target.files && loadCSV(e.target.files[0])} />
+      <input id="csvInput" type="file" onChange={(e) => e.target.files && loadCSV(e.target.files[0])} />
       <button onClick={play}>Play</button>
       <button onClick={pause}>Pause</button>
       <button onClick={reset}>Reset</button>
+      <ExportarPDF />
       <p>Timestamp atual: {timestampAtual}</p>
       <input
         type="range"
