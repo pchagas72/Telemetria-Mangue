@@ -62,10 +62,11 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
   - Envio de comandos de debug [X]  
   - Roteamento entre páginas com React Router [X]
   - Melhorar interface para mobile [ ]
+  - Adicionar página de sessões antigas [ ]
 
 - Implementar database [X]
 - Melhorar PDF gerado [ ]
-- Modificar código da SCU [ ]  
+- Modificar código da SCU [ ]
 - Testes finais com dados reais no carro [ ]  
 - Estilização da interface (botões, layout, responsividade) [ ]  
 - Escrita da documentação técnica (instalação, manutenção) [ ]
