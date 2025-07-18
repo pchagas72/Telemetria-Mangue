@@ -59,7 +59,8 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
   - Página de replay com barra de progresso [X]  
   - Download de CSV [X]  
   - Envio de comandos de debug [X]  
-  - Roteamento entre páginas com React Router [X]  
+  - Roteamento entre páginas com React Router [X]
+  - Melhorar interface para mobile [ ]
 
 - Melhorar PDF gerado [ ]
 - Estilização da interface (botões, layout, responsividade) [ ]  
