@@ -24,9 +24,12 @@ MD = MangueData()
 PORTA_BT = "/dev/rfcomm0"
 usar_simulacao = not os.path.exists(PORTA_BT)
 debugger = BluetoothDebugger(PORTA_BT, 9600, simulate=usar_simulacao)
-SIMULAR_INTERFACE = True
+SIMULAR_INTERFACE = False
 setup_cors(app)
-MD.id_sessao_atual = criar_sessao("Teste de simulação")
+if (SIMULAR_INTERFACE):
+    MD.id_sessao_atual = criar_sessao("Teste de simulação")
+else:
+    MD.id_sessao_atual = criar_sessao("Telemetria MQTT")
 criar_tabelas()
 
 
@@ -39,12 +42,14 @@ async def websocket_endpoint(websocket: WebSocket):
                 data = MD.gerar_dados()
                 await websocket.send_text(json.dumps(data))
                 MD.salvar_em_csv(data)
-                MD.salvar_em_db(data) 
+                MD.salvar_em_db(data)
             else:
                 async with aiomqtt.Client("localhost") as client:
                     await client.subscribe("telemetria/mangue")
                     async for data in client.messages:
-                        print(data)
+                        payload_str = data.payload.decode("utf-8")
+                        dados = json.loads(payload_str)
+                        MD.salvar_em_db(dados)
                         await websocket.send_text(
                             json.dumps(json.loads(data.payload.decode()))
                         )

@@ -186,14 +186,29 @@ class MangueData:
         if self.id_sessao_atual is None:
             self.iniciar_nova_sessao()
 
-        con = conectar()
-        cur = con.cursor()
-        campos = ",".join(dados.keys())
-        placeholders = ",".join(["?"] * len(dados))
+        # Verificação de integridade
+        campos = list(dados.keys())
         valores = list(dados.values())
-        cur.execute(f"""
-            INSERT INTO dado (sessao_id, {campos})
-            VALUES (?, {placeholders})
-        """, [self.id_sessao_atual] + valores)
-        con.commit()
-        con.close()
+
+        if len(campos) != len(valores):
+            print("[ERRO] Campos e valores com tamanhos diferentes")
+            return
+
+        print("[DB] Salvando dados na sessão:", self.id_sessao_atual)
+        try:
+            con = conectar()
+            cur = con.cursor()
+
+            campos_sql = ",".join(campos)
+            placeholders = ",".join(["?"] * len(campos))
+            sql = f"""
+                INSERT INTO dado (sessao_id, {campos_sql})
+                VALUES (?, {placeholders})
+            """
+
+            cur.execute(sql, [self.id_sessao_atual] + valores)
+            con.commit()
+        except Exception as e:
+            print(f"[ERRO] Falha ao salvar no banco: {e}")
+        finally:
+            con.close()
