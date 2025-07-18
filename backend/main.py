@@ -11,9 +11,11 @@ from fastapi import UploadFile, File
 from fastapi import Request
 from starlette.websockets import WebSocketDisconnect
 
-from data.mangue_data import MangueData
-from debug.debugger import BluetoothDebugger
+from services.data.mangue_data import MangueData
+from services.debug.debugger import BluetoothDebugger
 from core.config import setup_cors
+from database.db import criar_sessao
+from database.db import criar_tabelas
 
 
 app = FastAPI()
@@ -24,6 +26,8 @@ usar_simulacao = not os.path.exists(PORTA_BT)
 debugger = BluetoothDebugger(PORTA_BT, 9600, simulate=usar_simulacao)
 SIMULAR_INTERFACE = True
 setup_cors(app)
+MD.id_sessao_atual = criar_sessao("Teste de simulação")
+criar_tabelas()
 
 
 @app.websocket("/ws/telemetry")
@@ -35,6 +39,7 @@ async def websocket_endpoint(websocket: WebSocket):
                 data = MD.gerar_dados()
                 await websocket.send_text(json.dumps(data))
                 MD.salvar_em_csv(data)
+                MD.salvar_em_db(data) 
             else:
                 async with aiomqtt.Client("localhost") as client:
                     await client.subscribe("telemetria/mangue")
