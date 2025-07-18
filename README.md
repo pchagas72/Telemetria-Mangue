@@ -73,5 +73,41 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 
 ---
 
+# Inspiração Tecnológica – Formula SAE / WEC aplicável ao Baja-SAE
+
+Este documento apresenta uma matriz comparativa entre tecnologias avançadas utilizadas nas competições Formula SAE e WEC, e sua aplicabilidade no contexto da equipe **Mangue Baja UFPE**.
+
+| Tecnologia / Conceito                           | Aplicação em FSAE / WEC                                                                 | Possível Adaptação na Mangue Baja UFPE                                           |
+|--------------------------------------------------|------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| 🔴 **Telemetria em tempo real**                  | Comunicação contínua carro ↔ box via rádio ou LTE.                                      | Já implementado com MQTT + WebSocket. Pode evoluir para transmissão LoRa.       |
+| 🧠 **Processamento local (Edge Computing)**       | Uso de microcontroladores para filtragem e compressão de dados a bordo.                | ESP32 ou Raspberry Pi para tratar dados antes de enviar.                         |
+| 🪪 **Identificação da sessão / piloto**           | Cada piloto e configuração possuem uma tag para análise posterior.                    | Criar botão de início/fim de sessão com nome do piloto, tempo e anotação.        |
+| 🔥 **Monitoramento térmico**                     | Sensores de temperatura em motor, freios, diferencial.                                 | Aplicável em motor, CVT, baterias e controlador.                                |
+| ⚙️ **Mapeamento de uso da marcha CVT**           | Correlação entre RPM e velocidade para avaliar eficiência do conjunto CVT.            | Já implementado nos gráficos do relatório PDF. Pode ser melhorado.               |
+| 🌡️ **Visualização térmica (mapas de calor)**     | Mapas de dissipação de calor ao longo da pista.                                         | Plotagens básicas em PDF ou replay; futuramente via matplotlib + heatmaps.       |
+| 📍 **Rastreamento GPS + mapa da pista**          | Trajeto visual com dados como velocidade e frenagem.                                   | Já implementado com Leaflet.js. Pode evoluir com mais métricas visuais.          |
+| ⚠️ **Alertas de falha (thresholds)**             | Dashboard indica em tempo real: "risco de falha", "temperatura crítica", etc.         | Pode ser implementado no back ou client com base em ranges definidos.            |
+| 📊 **Repositório de sessões com replay**         | Histórico navegável com dashboards comparativos.                                       | Implementado. Pode ser expandido com múltiplas sessões e comparação.             |
+| 🏁 **Comparação de pilotos/configurações**        | Avaliação estatística de quem anda melhor com qual setup.                             | Possível com base nos dados salvos em SQLite por sessão/piloto.                  |
+| 🔄 **Sincronização com sensores analógicos**     | Leitura simultânea de sensores analógicos com timestamp preciso.                      | Possível com ADCs no ESP32 e sincronização com timestamp de sessão.              |
+| 🔋 **Estimativa de consumo energético**           | Calculo do gasto energético ao longo da corrida.                                       | Já coletando corrente e tensão → pode calcular consumo e prever autonomia.       |
+| 📦 **Canal de comunicação unificado (CAN)**      | Padrão industrial de comunicação entre sensores e módulos.                             | Possível com ESP32 + módulo CAN. Alternativa viável para escalabilidade.         |
+| 💽 **Banco de dados relacional**                 | PostgreSQL / InfluxDB para consulta, análise e exportação.                            | Já usando SQLite, ideal para embedded. Futuro: replicar para nuvem ou exportar.  |
+| 🧪 **Análise preditiva (ML básico)**              | Detectar padrões de falha antes de ocorrerem com aprendizado de máquina.              | Futuro: aplicar regressão, SVM ou clustering para anomalias em RPM/temperatura.  |
+| 🧰 **Calibração e setup assistido**              | Comparar configurações de suspensão, pneus, CVT etc.                                   | Criar dashboard para análise de impacto de cada variável.                        |
+| 🖥️ **Painel de controle com filtros**             | Dashboard onde engenheiros podem filtrar variáveis específicas durante o replay.       | Em desenvolvimento. Pode ser integrado com sliders e seleção de métricas.        |
+| 🕒 **Timestamp de alta precisão (RTC / NTP)**     | Dados marcados com tempo exato para sincronização cruzada.                            | Pode usar RTC (Real Time Clock) ou sincronização com servidor NTP.               |
+| 🛰️ **Backup na nuvem / logs externos**            | Toda sessão é automaticamente salva e pode ser revisitada remotamente.                | Futuro: Enviar logs para um serviço como Firebase, Supabase ou servidor privado. |
+
+---
+
+## 💡 Outras ideias aplicáveis
+
+- ✅ *Controle de qualidade de sensores:* leitura redundante e verificação cruzada.
+- 📈 *Dashboard administrativo da equipe:* sessões, consumo, falhas registradas.
+- 🧾 *Histórico de manutenção digitalizado:* associar falhas com logs anteriores.
+- 🚥 *“Modo corrida” com interface reduzida:* dados apenas essenciais na tela.
+
+
 Feito por Pedro Chagas, membro da equipe Mangue Baja UFPE
 =======
