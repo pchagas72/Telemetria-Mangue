@@ -43,6 +43,7 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
 - ✅ Download e exclusão segura de arquivos CSV  
 - ✅ Comunicação cliente-servidor com `fetch`, `WebSocket` e `MQTT`  
 - ✅ Context API e hooks para controle de replay
+- ✅ Database com SQLite
 
 ---
 
@@ -62,10 +63,11 @@ Este é o sistema de telemetria e diagnóstico em tempo real utilizado pela equi
   - Roteamento entre páginas com React Router [X]
   - Melhorar interface para mobile [ ]
 
+- Implementar database [X]
 - Melhorar PDF gerado [ ]
-- Estilização da interface (botões, layout, responsividade) [ ]  
 - Modificar código da SCU [ ]  
 - Testes finais com dados reais no carro [ ]  
+- Estilização da interface (botões, layout, responsividade) [ ]  
 - Escrita da documentação técnica (instalação, manutenção) [ ]
 
 ---
