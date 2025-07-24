@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 import shutil
+import platform
 from pathlib import Path
 
 import aiomqtt
@@ -17,6 +18,9 @@ from core.config import setup_cors
 from database.db import criar_sessao
 from database.db import criar_tabelas
 
+# Corrige problema com asyncio no Windows
+if platform.system() == "Windows":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 app = FastAPI()
 
@@ -26,10 +30,12 @@ usar_simulacao = not os.path.exists(PORTA_BT)
 debugger = BluetoothDebugger(PORTA_BT, 9600, simulate=usar_simulacao)
 SIMULAR_INTERFACE = False
 setup_cors(app)
-if (SIMULAR_INTERFACE):
+
+if SIMULAR_INTERFACE:
     MD.id_sessao_atual = criar_sessao("Teste de simulação")
 else:
     MD.id_sessao_atual = criar_sessao("Telemetria MQTT")
+
 criar_tabelas()
 
 
@@ -44,16 +50,19 @@ async def websocket_endpoint(websocket: WebSocket):
                 MD.salvar_em_csv(data)
                 MD.salvar_em_db(data)
             else:
-                async with aiomqtt.Client("localhost") as client:
-                    await client.subscribe("telemetria/mangue")
+                async with aiomqtt.Client(
+                    hostname="69.55.61.114",
+                    port=1883,
+                    username="manguebaja",
+                    password="Rolabosta1417"
+                ) as client:
+                    await client.subscribe("/logging")
                     async for data in client.messages:
-                        payload_str = data.payload.decode("utf-8")
-                        dados = json.loads(payload_str)
-                        MD.salvar_em_db(dados)
-                        await websocket.send_text(
-                            json.dumps(json.loads(data.payload.decode()))
-                        )
-            await asyncio.sleep(0.0001)
+                        payload = data.payload
+                        dados = MD.parse_mqtt_packet(payload)
+                        #MD.salvar_em_db(dados)
+                        await websocket.send_text(json.dumps(dados))
+            await asyncio.sleep(0.01)
     except WebSocketDisconnect:
         print("[WebSocket] Cliente desconectado")
     except Exception as e:
@@ -66,7 +75,7 @@ async def download_csv():
     if not arquivo_original.exists():
         return {"error": "Arquivo não encontrado"}
 
-    temp_path = Path("./data/temp_telemetria.csv").resolve()
+    temp_path = Path("./output/temp_telemetria.csv").resolve()
     shutil.copyfile(arquivo_original, temp_path)
 
     return FileResponse(

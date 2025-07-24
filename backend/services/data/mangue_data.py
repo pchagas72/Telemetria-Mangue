@@ -2,12 +2,12 @@ import math
 import os
 import random
 from datetime import datetime, timedelta
+import struct
 
 import pandas as pd
 import matplotlib.pyplot as plt
 from fpdf import FPDF
-
-from database.db import conectar, criar_tabelas
+from database.db import conectar
 
 
 class MangueData:
@@ -212,3 +212,40 @@ class MangueData:
             print(f"[ERRO] Falha ao salvar no banco: {e}")
         finally:
             con.close()
+
+    def parse_mqtt_packet(self, payload: bytes) -> dict:
+        fmt = "<fbbfbhhhhhhhhhhbddi"
+
+        if len(payload) != struct.calcsize(fmt):
+            raise ValueError(f"tamanho inesperado: {len(payload)} bytes (esperado {struct.calcsize(fmt)})")
+        (
+            volt, soc, cvt, current, temperature, speed,
+            acc_x, acc_y, acc_z,
+            dps_x, dps_y, dps_z,
+            roll, pitch,
+            rpm, flags,
+            latitude, longitude,
+            timestamp
+        ) = struct.unpack(fmt, payload)
+
+        return {
+            "accx": acc_x,
+            "accy": acc_y,
+            "accz": acc_z,
+            "dpsx": dps_x,
+            "dpsy": dps_y,
+            "dpsz": dps_z,
+            "roll": roll,
+            "pitch": pitch,
+            "rpm": rpm,
+            "vel": speed,
+            "temp_motor": temperature,
+            "soc": soc,
+            "temp_cvt": cvt,
+            "volt": volt,
+            "current": current,
+            "flags": flags,
+            "latitude": latitude,
+            "longitude": longitude,
+            "timestamp": timestamp,
+        }
